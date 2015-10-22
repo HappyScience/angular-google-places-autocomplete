@@ -254,7 +254,7 @@ angular.module('google.places', [])
                         }
 
                         $timeout(function() {
-                            matches = selectMatches($scope.customPlacesFunc);
+                            matches = selectMatches($scope.customPlaces);
                             deferred.resolve(matches);
                         }, 0);
 
