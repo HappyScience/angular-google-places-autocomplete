@@ -36,6 +36,7 @@ angular.module('google.places', [])
                     model: '=ngModel',
                     options: '=?',
                     forceSelection: '=?',
+                    fallbackTextSearch: '=?',
                     customPlaces: '=?',
                     customPlacesFunc: '=?',
                     predictionsNum: '=?'
@@ -158,7 +159,9 @@ angular.module('google.places', [])
                         prediction = $scope.predictions[$scope.selected];
                         if (!prediction) return;
 
-                        if (prediction.is_custom) {
+                        if (prediction.is_text_search) {
+                            textSearch();
+                        } else if (prediction.is_custom) {
                             $timeout(function () {
                                 $scope.model = prediction.place;
                                 $scope.$emit('g-places-autocomplete:select', prediction.place);
@@ -180,6 +183,20 @@ angular.module('google.places', [])
                         }
 
                         clearPredictions();
+                    }
+
+                    function textSearch() {
+                        placesService.textSearch({query: $scope.query}, function (results, status) {
+                            var place;
+
+                            if (status == google.maps.places.PlacesServiceStatus.OK) {
+                                place = results[0];
+                                $scope.$apply(function () {
+                                    $scope.model = place;
+                                    $scope.$emit('g-places-autocomplete:select', place);
+                                });
+                            }
+                        });
                     }
 
                     function parse(viewValue) {
@@ -207,6 +224,21 @@ angular.module('google.places', [])
 
                                     if ($scope.predictions.length > $scope.predictionsNum) {
                                         $scope.predictions.length = $scope.predictionsNum;  // trim predictions down to size
+                                    }
+
+                                    if ($scope.fallbackTextSearch) {
+                                        $scope.predictions.push.apply($scope.predictions, [
+                                            {
+                                                is_text_search: true,
+                                                is_custom: true,
+                                                custom_prediction_label: $scope.query + ' で住所検索する' +
+                                                    '(Custom Non-Google Result)',  // required by https://developers.google.com/maps/terms § 10.1.1 (d)
+                                                description: undefined,
+                                                place: undefined,
+                                                matched_substrings: [],
+                                                terms: []
+                                            }
+                                        ]);
                                     }
                                 });
                             });
