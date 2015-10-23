@@ -219,6 +219,10 @@ angular.module('google.places', [])
                                     $scope.predictions.push.apply($scope.predictions, customPlacePredictions);
 
                                     if (status == google.maps.places.PlacesServiceStatus.OK) {
+                                        predictions.map(function(prediction) {
+                                            prediction.icon = 'marker';
+                                            return prediction;
+                                        });
                                         $scope.predictions.push.apply($scope.predictions, predictions);
                                     }
 
@@ -227,11 +231,13 @@ angular.module('google.places', [])
                                     }
 
                                     if ($scope.fallbackTextSearch) {
+                                        var icon = $scope.fallbackTextSearch.icon || 'marker';
                                         var label = $scope.fallbackTextSearch.label || 'Search place by this.';
                                         var formatted_address = $scope.query + ' ' + label;
                                         var custom_prediction_label = $scope.fallbackTextSearch.custom_prediction_label || undefined;
 
                                         var items = selectMatches([{
+                                            icon: icon,
                                             formatted_address: formatted_address,
                                             custom_prediction_label: custom_prediction_label
                                         }]);
@@ -342,6 +348,7 @@ angular.module('google.places', [])
                             match = getCustomPlaceMatches($scope.query, place);
                             if (match.matched_substrings.length > 0) {
                                 predictions.push({
+                                    icon: place.icon || 'marker',
                                     is_custom: true,
                                     custom_prediction_label: place.custom_prediction_label || '(Custom Non-Google Result)',  // required by https://developers.google.com/maps/terms § 10.1.1 (d)
                                     description: place.formatted_address,
@@ -459,7 +466,7 @@ angular.module('google.places', [])
 
     .directive('gPlacesAutocompletePrediction', [function () {
         var TEMPLATE = [
-            '<span class="pac-icon pac-icon-marker"></span>',
+            '<span class="pac-icon pac-icon-{{prediction.icon}}">{{prediction.icon}}</span>',
             '<span class="pac-item-query" ng-bind-html="prediction | highlightMatched"></span>',
             '<span ng-repeat="term in prediction.terms | unmatchedTermsOnly:prediction">{{term.value | trailingComma:!$last}}&nbsp;</span>',
             '<span class="custom-prediction-label" ng-if="prediction.is_custom">&nbsp;{{prediction.custom_prediction_label}}</span>'
