@@ -227,18 +227,17 @@ angular.module('google.places', [])
                                     }
 
                                     if ($scope.fallbackTextSearch) {
-                                        $scope.predictions.push.apply($scope.predictions, [
-                                            {
-                                                is_text_search: true,
-                                                is_custom: true,
-                                                custom_prediction_label: $scope.query + ' で住所検索する' +
-                                                    '(Custom Non-Google Result)',  // required by https://developers.google.com/maps/terms § 10.1.1 (d)
-                                                description: undefined,
-                                                place: undefined,
-                                                matched_substrings: [],
-                                                terms: []
-                                            }
-                                        ]);
+                                        var label = $scope.fallbackTextSearch.label || 'Search place by this.';
+                                        var formatted_address = $scope.query + ' ' + label;
+                                        var custom_prediction_label = $scope.fallbackTextSearch.custom_prediction_label || undefined;
+
+                                        var items = selectMatches([{
+                                            formatted_address: formatted_address,
+                                            custom_prediction_label: custom_prediction_label
+                                        }]);
+                                        items[0].is_text_search = true;
+
+                                        $scope.predictions.push.apply($scope.predictions, items);
                                     }
                                 });
                             });
@@ -291,28 +290,6 @@ angular.module('google.places', [])
                         }, 0);
 
                         return deferred.promise;
-
-                        function selectMatches(places) {
-                            var predictions = [],
-                            place, match, i;
-
-                            for (i = 0; i < places.length; i++) {
-                                place = places[i];
-
-                                match = getCustomPlaceMatches(query, place);
-                                if (match.matched_substrings.length > 0) {
-                                    predictions.push({
-                                        is_custom: true,
-                                        custom_prediction_label: place.custom_prediction_label || '(Custom Non-Google Result)',  // required by https://developers.google.com/maps/terms § 10.1.1 (d)
-                                        description: place.formatted_address,
-                                        place: place,
-                                        matched_substrings: match.matched_substrings,
-                                        terms: match.terms
-                                    });
-                                }
-                            }
-                            return predictions;
-                        }
                     }
 
                     function getCustomPlaceMatches(query, place) {
@@ -353,6 +330,28 @@ angular.module('google.places', [])
                             matched_substrings: matched_substrings,
                             terms: terms
                         };
+                    }
+
+                    function selectMatches(places) {
+                        var predictions = [],
+                        place, match, i;
+
+                        for (i = 0; i < places.length; i++) {
+                            place = places[i];
+
+                            match = getCustomPlaceMatches($scope.query, place);
+                            if (match.matched_substrings.length > 0) {
+                                predictions.push({
+                                    is_custom: true,
+                                    custom_prediction_label: place.custom_prediction_label || '(Custom Non-Google Result)',  // required by https://developers.google.com/maps/terms § 10.1.1 (d)
+                                    description: place.formatted_address,
+                                    place: place,
+                                    matched_substrings: match.matched_substrings,
+                                    terms: match.terms
+                                });
+                            }
+                        }
+                        return predictions;
                     }
 
                     function isString(val) {
