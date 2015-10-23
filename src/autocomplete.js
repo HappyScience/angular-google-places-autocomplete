@@ -466,7 +466,7 @@ angular.module('google.places', [])
 
     .directive('gPlacesAutocompletePrediction', [function () {
         var TEMPLATE = [
-            '<span class="pac-icon pac-icon-{{prediction.icon}}">{{prediction.icon}}</span>',
+            '<span class="pac-icon pac-icon-{{prediction.icon}}"></span>',
             '<span class="pac-item-query" ng-bind-html="prediction | highlightMatched"></span>',
             '<span ng-repeat="term in prediction.terms | unmatchedTermsOnly:prediction">{{term.value | trailingComma:!$last}}&nbsp;</span>',
             '<span class="custom-prediction-label" ng-if="prediction.is_custom">&nbsp;{{prediction.custom_prediction_label}}</span>'
