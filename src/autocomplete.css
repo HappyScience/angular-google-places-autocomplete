@@ -87,12 +87,28 @@
     background-position: -18px -1px
 }
 
+.pac-icon-search {
+    background-position: -1px -1px
+}
+
 .pac-icon-marker {
     background-position: -1px -161px
 }
 
+.pac-icon-person {
+    background-position: -1px -261px;
+}
+
+.pac-item-selected .pac-icon-search {
+    background-position: -18px -1px
+}
+
 .pac-item-selected .pac-icon-marker {
     background-position: -18px -161px
+}
+
+.pac-item-selected .pac-icon-person {
+    background-position: -18px -261px
 }
 
 .pac-placeholder {
